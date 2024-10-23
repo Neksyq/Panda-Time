@@ -1,13 +1,15 @@
-// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class DetoxTrackerScreen extends StatefulWidget {
+  const DetoxTrackerScreen({super.key});
+
   @override
   _DetoxTrackerScreenState createState() => _DetoxTrackerScreenState();
 }
 
-class _DetoxTrackerScreenState extends State<DetoxTrackerScreen> {
+class _DetoxTrackerScreenState extends State<DetoxTrackerScreen>
+    with WidgetsBindingObserver {
   bool isDetoxing = false;
   DateTime? startTime;
   Duration elapsedTime = Duration.zero;
@@ -15,7 +17,27 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen> {
   @override
   void initState() {
     super.initState();
-    print("Notification service initialized.");
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsFlutterBinding.ensureInitialized();
+    WakelockPlus.enable();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      if (isDetoxing) {
+        print("Move to background or was detached");
+      } else if (state == AppLifecycleState.resumed) {
+        print("Resumed");
+      }
+    }
   }
 
   void startDetox() {
@@ -24,6 +46,7 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen> {
       startTime = DateTime.now();
       elapsedTime = Duration.zero;
     });
+    WakelockPlus.toggle(enable: true);
     print("Detox started at: $startTime");
     _trackDetoxTime();
   }
@@ -33,6 +56,7 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen> {
       isDetoxing = false;
       elapsedTime = Duration.zero;
     });
+    WakelockPlus.toggle(enable: false);
     print("Detox stopped.");
   }
 
