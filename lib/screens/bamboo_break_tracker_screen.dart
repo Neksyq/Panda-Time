@@ -4,6 +4,7 @@ import 'package:pandatime/widgets/bambooBreak/control_button.dart';
 import 'package:pandatime/widgets/bambooBreak/progress_indicator.dart';
 import 'package:pandatime/widgets/bambooBreak/set_time_button.dart';
 import 'package:pandatime/widgets/bambooBreak/status.dart';
+import 'package:pandatime/widgets/coins/coins_display.dart';
 import 'package:pandatime/widgets/countdown_text.dart';
 import 'package:pandatime/widgets/timePicker/cupertino_panda_time_picker.dart';
 import 'package:pandatime/widgets/timePicker/time_picker_header.dart';
@@ -106,7 +107,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Opens the time picker to select BambooBreak duration
   void _showBambooBreakTimePicker(BuildContext context) {
-    print('Show Bamboo Break Time Picker');
     int selectedIndex =
         bambooBreakTimes.indexOf(remainingTime ~/ 60); // Initial index
     temporaryTime =
@@ -152,24 +152,26 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Panda Time')),
+      appBar: AppBar(
+        actions: const [CoinsDisplay(coins: 100)],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             CurrentStatusText(
-                text1: 'Bamboo Break in Progress...',
-                text2: 'Out of Bamboo Break!',
+                text1: 'Bamboo Bliss Mode...',
+                text2: 'Out of the Bamboo Forest',
                 isActive: isOnBambooBreak),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             BambooBreakProcessIndicator(
                 animationController: _animationController),
             const SizedBox(height: 20),
             CountdownText(time: remainingTime),
-            const SizedBox(height: 5),
+            const SizedBox(height: 20),
             OpenTimePickerButton(
                 isEnabled: isOnBambooBreak,
-                buttonText: 'Set Bamboo Break Duration',
+                buttonText: 'Set Duration',
                 onButtonPressed: () => {_showBambooBreakTimePicker(context)}),
             const SizedBox(height: 10),
             ControlButton(
@@ -177,7 +179,8 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
                 textOnActive: 'Stop Bamboo Break',
                 textOnNonActive: 'Start Bamboo Break',
                 executeOnActive: () => {_stopBambooBreak()},
-                executeOnNonActive: () => {_startBambooBreak()})
+                executeOnNonActive: () => {_startBambooBreak()}),
+            const SizedBox(height: 110),
           ],
         ),
       ),

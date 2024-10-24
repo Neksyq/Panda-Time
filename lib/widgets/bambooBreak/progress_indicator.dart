@@ -23,8 +23,8 @@ class BambooBreakProcessIndicator extends StatelessWidget {
       animation: animationController,
       builder: (context, _) {
         return Container(
-          height: 300,
-          width: 300,
+          height: 225,
+          width: 225,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
           ),

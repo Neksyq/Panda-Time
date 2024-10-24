@@ -11,7 +11,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Panda Time',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

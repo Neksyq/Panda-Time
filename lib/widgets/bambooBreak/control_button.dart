@@ -21,7 +21,7 @@ class ControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: isActive ? executeOnActive : executeOnNonActive,
-      child: Text(isActive ? 'Stop Bamboo Break' : 'Start Bamboo Break'),
+      child: Text(isActive ? textOnActive : textOnNonActive),
     );
   }
 }
