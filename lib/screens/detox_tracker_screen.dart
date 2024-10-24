@@ -1,6 +1,8 @@
-import 'package:detoxtime/components/custom/processIndicator/liquid_painter.dart';
-import 'package:detoxtime/components/custom/processIndicator/progress_bar.dart';
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:pandatime/components/custom/processIndicator/progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class DetoxTrackerScreen extends StatefulWidget {
@@ -13,10 +15,14 @@ class DetoxTrackerScreen extends StatefulWidget {
 class _DetoxTrackerScreenState extends State<DetoxTrackerScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  int maxDuration = 10;
+  int maxDuration = 5; // Default max duration in seconds
   bool isDetoxing = false;
   DateTime? startTime;
   Duration elapsedTime = Duration.zero;
+
+  // List of selectable times for the detox session (in minutes)
+  final List<int> detoxTimes =
+      List.generate(24 * 60 ~/ 5, (index) => (index + 1) * 5);
 
   @override
   void initState() {
@@ -39,6 +45,8 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _controller.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -56,35 +64,122 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen>
 
   void startDetox() {
     setState(() {
+      _controller.reset();
+      _controller.forward();
       isDetoxing = true;
       startTime = DateTime.now();
       elapsedTime = Duration.zero;
     });
     WakelockPlus.toggle(enable: true);
-    print("Detox started at: $startTime");
     _trackDetoxTime();
   }
 
   void stopDetox() {
     setState(() {
       isDetoxing = false;
+      _controller.reset();
       elapsedTime = Duration.zero;
     });
     WakelockPlus.toggle(enable: false);
-    print("Detox stopped.");
   }
 
   Future<void> _trackDetoxTime() async {
-    print("Tracking detox time...");
     await Future.delayed(const Duration(seconds: 10));
     if (isDetoxing) {
       print("Tracking is done");
     }
   }
 
+  void _showTimePicker(BuildContext context) {
+    int selectedIndex = detoxTimes.indexOf(maxDuration ~/ 60); // Initial index
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 300,
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Detox Duration (Minutes)',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Set the selected value and close the picker
+                        setState(() {
+                          maxDuration = detoxTimes[selectedIndex] * 60;
+                          _controller.duration = Duration(seconds: maxDuration);
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(fontSize: 18, color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  itemExtent: 40,
+                  scrollController: FixedExtentScrollController(
+                    initialItem: selectedIndex,
+                  ),
+                  onSelectedItemChanged: (index) {
+                    // Update the selected index
+                    selectedIndex = index;
+                  },
+                  children: detoxTimes.map((time) {
+                    return Center(
+                      child: Text(
+                        '$time minutes',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String intToTimeLeft(int value) {
+    int h, m, s;
+
+    h = value ~/ 3600;
+
+    m = ((value - h * 3600)) ~/ 60;
+
+    s = value - (h * 3600) - (m * 60);
+
+    String hourLeft =
+        h.toString().length < 2 ? "0" + h.toString() : h.toString();
+
+    String minuteLeft =
+        m.toString().length < 2 ? "0" + m.toString() : m.toString();
+
+    String secondsLeft =
+        s.toString().length < 2 ? "0" + s.toString() : s.toString();
+
+    String result = "$hourLeft:$minuteLeft:$secondsLeft";
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
-    double val = (_controller.value * maxDuration);
     List<Color> gradientColors = const [
       Color(0xffFF0069),
       Color(0xffFED602),
@@ -94,96 +189,89 @@ class _DetoxTrackerScreenState extends State<DetoxTrackerScreen>
       Color(0xffFF0069),
     ];
     return Scaffold(
-        appBar: AppBar(title: const Text('Detox Tracker')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              isDetoxing
-                  ? const Text(
-                      'Detox in Progress...',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    )
-                  : const Text(
-                      'Not Detoxing',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-              const SizedBox(
-                height: 50,
-              ),
-              AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, _) {
-                    return Container(
-                      height: 300,
-                      width: 300,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
+      appBar: AppBar(title: const Text('Panda Time')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                isDetoxing
+                    ? const Text(
+                        'Detox in Progress...',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      )
+                    : const Text(
+                        'Not Detoxing',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: CustomPaint(
-                              painter: LiquidPainter(
-                                _controller.value * maxDuration,
-                                maxDuration.toDouble(),
-                              ),
-                            ),
-                          ),
-                          CustomPaint(
-                              painter: RadialProgressPainter(
-                            value: _controller.value * maxDuration,
-                            backgroundGradientColors: gradientColors,
-                            minValue: 0,
-                            maxValue: maxDuration.toDouble(),
-                          )),
-                        ],
-                      ),
-                    );
-                  }),
-              const SizedBox(height: 20),
-              Container(
-                alignment: Alignment.center,
-                height: 60,
-                decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.white54,
-                      width: 2,
-                    ),
-                    shape: BoxShape.circle),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (isDetoxing) {
-                        _controller.reset();
-                      } else {
-                        _controller.reset();
-                        _controller.forward();
-                      }
-                      isDetoxing = !isDetoxing;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    height: isDetoxing ? 25 : 60,
-                    width: isDetoxing ? 25 : 60,
-                    duration: const Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(isDetoxing ? 4 : 100),
-                      color: const Color.fromARGB(66, 0, 0, 0),
-                    ),
+              ],
+            ),
+            const SizedBox(height: 40),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                return Container(
+                  height: 300,
+                  width: 300,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
                   ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          'assets/images/panda.jpg', // Update with the path to your image
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      CustomPaint(
+                        painter: RadialProgressPainter(
+                          value: _controller.value * maxDuration,
+                          backgroundGradientColors: gradientColors,
+                          minValue: 0,
+                          maxValue: maxDuration.toDouble(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  intToTimeLeft(maxDuration),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: isDetoxing ? stopDetox : startDetox,
-                child: Text(isDetoxing ? 'Stop Detox' : 'Start Detox'),
-              ),
-            ],
-          ),
-        ));
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _showTimePicker(context);
+              },
+              child: const Text('Set Detox Duration'),
+            ),
+            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: isDetoxing ? stopDetox : startDetox,
+              child: Text(isDetoxing ? 'Stop Detox' : 'Start Detox'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -1,4 +1,4 @@
-# detoxtime
+# pandatime
 
 A new Flutter project.
 
