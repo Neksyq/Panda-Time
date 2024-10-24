@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/detox_tracker_screen.dart';
+import 'screens/bamboo_break_tracker_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Detox Tracker',
+      title: 'Panda Time',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const DetoxTrackerScreen(),
+      home: const BambooBreakTrackerScreen(),
     );
   }
 }
