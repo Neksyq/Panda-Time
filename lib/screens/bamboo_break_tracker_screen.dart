@@ -9,6 +9,7 @@ import 'package:pandatime/widgets/countdown_text.dart';
 import 'package:pandatime/widgets/timePicker/cupertino_panda_time_picker.dart';
 import 'package:pandatime/widgets/timePicker/time_picker_header.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:pandatime/widgets/messages/flash_message_screen.dart';
 
 class BambooBreakTrackerScreen extends StatefulWidget {
   const BambooBreakTrackerScreen({super.key});
@@ -27,6 +28,8 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   bool isOnBambooBreak = false; // Tracks if Bamboo Break session is active
   int temporaryTime =
       300; // Temporary variable for holding selected time during picker interaction (default 5 minutes)
+
+  final GlobalKey<CoinsDisplayState> _coinsDisplayKey = GlobalKey();
 
   // List of selectable times for the BambooBreak session (in minutes)
   final List<int> bambooBreakTimes =
@@ -54,14 +57,8 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1), // Dummy initial duration
-    )
-      ..addListener(() {
+    )..addListener(() {
         setState(() {}); // Rebuild widget to update progress indicator
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _stopBambooBreak();
-        }
       });
   }
 
@@ -84,6 +81,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Stops (pauses) the BambooBreak session
   void _stopBambooBreak() {
+    print("Stop");
     setState(() {
       isOnBambooBreak = false;
       _animationController.stop();
@@ -94,12 +92,22 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Starts or continues the countdown timer
   void _startCountdown() {
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         setState(() {
           remainingTime--; // Decrease remaining time by 1 second
         });
       } else {
+        showFlashMessage(
+          context,
+          "Success!",
+          "You've completed your task!",
+          backgroundColor: Colors.green,
+        );
+
+        const double earnedCoins = 10.0;
+        double currentCoins = _coinsDisplayKey.currentState!.coins;
+        _coinsDisplayKey.currentState?.updateCoins(earnedCoins + currentCoins);
         _stopBambooBreak(); // Stop BambooBreak when countdown reaches 0
       }
     });
@@ -153,7 +161,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: const [CoinsDisplay(coins: 100)],
+        actions: [CoinsDisplay(key: _coinsDisplayKey)],
       ),
       body: Center(
         child: Column(
