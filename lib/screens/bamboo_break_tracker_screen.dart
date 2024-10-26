@@ -23,6 +23,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late AnimationController
       _animationController; // Animation controller for the progress indicator
+  double earnedPointsPerSession = 0;
   Timer? _countdownTimer; // Timer for countdown
   int remainingTime = 300; // Countdown timer in seconds (default 5 minutes)
   bool isOnBambooBreak = false; // Tracks if Bamboo Break session is active
@@ -81,7 +82,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Stops (pauses) the BambooBreak session
   void _stopBambooBreak() {
-    print("Stop");
     setState(() {
       isOnBambooBreak = false;
       _animationController.stop();
@@ -92,23 +92,32 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Starts or continues the countdown timer
   void _startCountdown() {
+    //For Debug purposes
+    earnedPointsPerSession = 10.0;
+    showFlashMessage(
+      context,
+      "Panda-tastic!",
+      "You've earned $earnedPointsPerSession bamboo coins!",
+      backgroundColor: Colors.green,
+    );
+
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         setState(() {
           remainingTime--; // Decrease remaining time by 1 second
         });
       } else {
+        earnedPointsPerSession = 10.0;
+        double availableCoins = _coinsDisplayKey.currentState!.coins;
+        _coinsDisplayKey.currentState
+            ?.updateCoins(earnedPointsPerSession + availableCoins);
+        _stopBambooBreak(); // Stop BambooBreak when countdown reaches 0
         showFlashMessage(
           context,
-          "Success!",
-          "You've completed your task!",
+          "Panda-tastic!",
+          "You've earned $earnedPointsPerSession bamboo coins!",
           backgroundColor: Colors.green,
         );
-
-        const double earnedCoins = 10.0;
-        double currentCoins = _coinsDisplayKey.currentState!.coins;
-        _coinsDisplayKey.currentState?.updateCoins(earnedCoins + currentCoins);
-        _stopBambooBreak(); // Stop BambooBreak when countdown reaches 0
       }
     });
   }
