@@ -9,7 +9,7 @@ class CountdownText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       formatTime(time),
-      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
     );
   }
 }

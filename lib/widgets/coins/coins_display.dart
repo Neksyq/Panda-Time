@@ -40,7 +40,7 @@ class CoinsDisplayState extends State<CoinsDisplay> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8.0),
-      margin: const EdgeInsets.only(right: 16.0, top: 20.0),
+      margin: const EdgeInsets.only(right: 16.0, top: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),

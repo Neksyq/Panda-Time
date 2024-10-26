@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:pandatime/utils/localStorage/coins_storage.dart';
 import 'package:pandatime/widgets/bambooBreak/control_button.dart';
 import 'package:pandatime/widgets/bambooBreak/progress_indicator.dart';
 import 'package:pandatime/widgets/bambooBreak/set_time_button.dart';
 import 'package:pandatime/widgets/bambooBreak/status.dart';
 import 'package:pandatime/widgets/coins/coins_display.dart';
 import 'package:pandatime/widgets/countdown_text.dart';
+import 'package:pandatime/widgets/xpBar/xp_bar.dart';
 import 'package:pandatime/widgets/timePicker/cupertino_panda_time_picker.dart';
 import 'package:pandatime/widgets/timePicker/time_picker_header.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -30,8 +32,11 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   int temporaryTime =
       300; // Temporary variable for holding selected time during picker interaction (default 5 minutes)
 
-  final GlobalKey<CoinsDisplayState> _coinsDisplayKey = GlobalKey();
+  final int currentLevel = 3; // Example current level
+  final double progress = 0.6; // Example progress (60%)
 
+  final GlobalKey<CoinsDisplayState> _coinsDisplayKey = GlobalKey();
+  final GlobalKey<XPBarState> _xpBarKey = GlobalKey();
   // List of selectable times for the BambooBreak session (in minutes)
   final List<int> bambooBreakTimes =
       List.generate(24 * 60 ~/ 5, (index) => (index + 1) * 5);
@@ -58,9 +63,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       print('use leaves');
       _stopBambooBreak();
     } else if (state == AppLifecycleState.resumed) {
-      if (!isOnBambooBreak) {
-        _startBambooBreak();
-      }
       print('user returns');
     }
   }
@@ -103,6 +105,9 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Starts or continues the countdown timer
   void _startCountdown() {
+    const xp = 100.0;
+    double currentXP = _xpBarKey.currentState!.xp;
+    _xpBarKey.currentState?.updateXP(currentXP + xp);
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         setState(() {
@@ -174,10 +179,14 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       appBar: AppBar(
         actions: [CoinsDisplay(key: _coinsDisplayKey)],
       ),
-      body: Center(
+      body: Padding(
+        padding:
+            const EdgeInsets.only(top: 10.0), // Adjust the top padding here
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            XPBar(key: _xpBarKey),
+            const SizedBox(height: 30),
             CurrentStatusText(
                 text1: 'Bamboo Bliss Mode...',
                 text2: 'Out of the Bamboo Forest',
@@ -186,20 +195,20 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
             BambooBreakProcessIndicator(
                 animationController: _animationController),
             const SizedBox(height: 20),
-            CountdownText(time: remainingTime),
             const SizedBox(height: 20),
+            CountdownText(time: remainingTime),
+            const SizedBox(height: 40),
             OpenTimePickerButton(
                 isEnabled: isOnBambooBreak,
                 buttonText: 'Set Duration',
                 onButtonPressed: () => {_showBambooBreakTimePicker(context)}),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             ControlButton(
                 isActive: isOnBambooBreak,
                 textOnActive: 'Stop Bamboo Break',
                 textOnNonActive: 'Start Bamboo Break',
                 executeOnActive: () => {_stopBambooBreak()},
                 executeOnNonActive: () => {_startBambooBreak()}),
-            const SizedBox(height: 110),
           ],
         ),
       ),
