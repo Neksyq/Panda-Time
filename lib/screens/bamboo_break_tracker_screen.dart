@@ -41,7 +41,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     super.initState();
     WidgetsBinding.instance
         .addObserver(this); // To observe lifecycle events of the app
-    WakelockPlus.enable();
     _initializeAnimationController();
   }
 
@@ -50,8 +49,20 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _countdownTimer?.cancel();
-    WakelockPlus.disable();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      print('use leaves');
+      _stopBambooBreak();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!isOnBambooBreak) {
+        _startBambooBreak();
+      }
+      print('user returns');
+    }
   }
 
   void _initializeAnimationController() {
@@ -66,6 +77,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   /// Starts or resumes the BambooBreak session
   void _startBambooBreak() {
     setState(() {
+      WakelockPlus.enable();
       isOnBambooBreak = true;
     });
 
@@ -76,31 +88,21 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       _animationController.forward();
     }
 
-    WakelockPlus.toggle(enable: true);
     _startCountdown();
   }
 
   /// Stops (pauses) the BambooBreak session
   void _stopBambooBreak() {
     setState(() {
+      WakelockPlus.disable();
       isOnBambooBreak = false;
       _animationController.stop();
       _countdownTimer?.cancel();
     });
-    WakelockPlus.toggle(enable: false);
   }
 
   /// Starts or continues the countdown timer
   void _startCountdown() {
-    //For Debug purposes
-    earnedPointsPerSession = 10.0;
-    showFlashMessage(
-      context,
-      "Panda-tastic!",
-      "You've earned $earnedPointsPerSession bamboo coins!",
-      backgroundColor: Colors.green,
-    );
-
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         setState(() {
