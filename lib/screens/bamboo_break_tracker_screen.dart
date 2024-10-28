@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pandatime/utils/localStorage/coins_storage.dart';
 import 'package:pandatime/widgets/bambooBreak/control_button.dart';
 import 'package:pandatime/widgets/bambooBreak/progress_indicator.dart';
@@ -34,6 +35,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   final int currentLevel = 3; // Example current level
   final double progress = 0.6; // Example progress (60%)
+  static const platform = MethodChannel('com.example.pandatime/screen');
 
   final GlobalKey<CoinsDisplayState> _coinsDisplayKey = GlobalKey();
   final GlobalKey<XPBarState> _xpBarKey = GlobalKey();
@@ -47,6 +49,8 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     WidgetsBinding.instance
         .addObserver(this); // To observe lifecycle events of the app
     _initializeAnimationController();
+    _initializePlatformChannel();
+    WakelockPlus.enable();
   }
 
   @override
@@ -55,15 +59,34 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     _animationController.dispose();
     _countdownTimer?.cancel();
     super.dispose();
+    WakelockPlus.disable();
+  }
+
+  void _initializePlatformChannel() {
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'onScreenOff') {
+        print('Screen was locked, continuing detox');
+      } else if (call.method == 'onScreenOn') {
+        print('Screen is unlocked, continuing detox');
+      } else if (call.method == 'onAppPaused') {
+        print('App is switched, stopping detox');
+        if (isOnBambooBreak) {
+          _stopBambooBreak();
+        }
+      } else if (call.method == 'onAppResumed') {
+        print('App is active');
+      } else {
+        print('Unknown method: ${call.method}');
+      }
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      print('use leaves');
-      _stopBambooBreak();
+      platform.invokeMethod('onAppPaused');
     } else if (state == AppLifecycleState.resumed) {
-      print('user returns');
+      platform.invokeMethod('onAppResumed');
     }
   }
 
@@ -79,7 +102,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   /// Starts or resumes the BambooBreak session
   void _startBambooBreak() {
     setState(() {
-      WakelockPlus.enable();
       isOnBambooBreak = true;
     });
 
@@ -96,7 +118,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   /// Stops (pauses) the BambooBreak session
   void _stopBambooBreak() {
     setState(() {
-      WakelockPlus.disable();
       isOnBambooBreak = false;
       _animationController.stop();
       _countdownTimer?.cancel();
