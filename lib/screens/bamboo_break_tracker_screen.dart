@@ -27,6 +27,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       _animationController; // Animation controller for the progress indicator
   double earnedPointsPerSession = 0;
   Timer? _countdownTimer; // Timer for countdown
+  int previouslySelectedTime = 300;
   int remainingTime = 300; // Countdown timer in seconds (default 5 minutes)
   bool isOnBambooBreak = false; // Tracks if Bamboo Break session is active
   int temporaryTime =
@@ -127,9 +128,6 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Starts or continues the countdown timer
   void _startCountdown() {
-    const xp = 100.0;
-    double currentXP = _xpBarKey.currentState!.xp;
-    _xpBarKey.currentState?.updateXP(currentXP + xp);
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (remainingTime > 0) {
         setState(() {
@@ -147,6 +145,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
           "You've earned $earnedPointsPerSession bamboo coins!",
           backgroundColor: Colors.green,
         );
+        remainingTime = previouslySelectedTime;
       }
     });
   }
@@ -172,6 +171,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
                     setState(() {
                       if (temporaryTime > 0) {
                         remainingTime = temporaryTime;
+                        previouslySelectedTime = temporaryTime;
                         _animationController.duration =
                             Duration(seconds: remainingTime);
                         _animationController.reset();

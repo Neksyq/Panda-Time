@@ -118,7 +118,7 @@ void showFlashMessage(BuildContext context, String title, String message,
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      duration: const Duration(days: 365),
+      duration: const Duration(seconds: 5),
     ),
   );
 }
