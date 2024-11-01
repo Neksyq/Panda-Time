@@ -4,9 +4,10 @@ import 'package:pandatime/components/custom/processIndicator/progress_bar.dart';
 /// Bamboo Break circular progress indicator
 class BambooBreakProcessIndicator extends StatelessWidget {
   final AnimationController animationController;
+  final bool isActive;
 
   const BambooBreakProcessIndicator(
-      {super.key, required this.animationController});
+      {super.key, required this.animationController, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,9 @@ class BambooBreakProcessIndicator extends StatelessWidget {
             children: [
               ClipOval(
                 child: Image.asset(
-                  'assets/images/panda.jpg',
+                  isActive
+                      ? 'assets/images/pandaBambooBlizzMode.gif'
+                      : 'assets/images/pandaOutOfBambooForest.png',
                   fit: BoxFit.cover,
                 ),
               ),

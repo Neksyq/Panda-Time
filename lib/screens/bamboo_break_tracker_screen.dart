@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pandatime/utils/localStorage/coins_storage.dart';
 import 'package:pandatime/widgets/bambooBreak/control_button.dart';
 import 'package:pandatime/widgets/bambooBreak/progress_indicator.dart';
 import 'package:pandatime/widgets/bambooBreak/set_time_button.dart';
@@ -102,6 +101,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   /// Starts or resumes the BambooBreak session
   void _startBambooBreak() {
     setState(() {
+      WakelockPlus.enable();
       isOnBambooBreak = true;
     });
 
@@ -118,6 +118,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   /// Stops (pauses) the BambooBreak session
   void _stopBambooBreak() {
     setState(() {
+      WakelockPlus.disable();
       isOnBambooBreak = false;
       _animationController.stop();
       _countdownTimer?.cancel();
@@ -201,24 +202,23 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
         actions: [CoinsDisplay(key: _coinsDisplayKey)],
       ),
       body: Padding(
-        padding:
-            const EdgeInsets.only(top: 10.0), // Adjust the top padding here
+        padding: const EdgeInsets.only(top: 0.0), // Adjust the top padding here
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             XPBar(key: _xpBarKey),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             CurrentStatusText(
                 text1: 'Bamboo Bliss Mode...',
                 text2: 'Out of the Bamboo Forest',
                 isActive: isOnBambooBreak),
             const SizedBox(height: 30),
             BambooBreakProcessIndicator(
-                animationController: _animationController),
-            const SizedBox(height: 20),
+                animationController: _animationController,
+                isActive: isOnBambooBreak),
             const SizedBox(height: 20),
             CountdownText(time: remainingTime),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             OpenTimePickerButton(
                 isEnabled: isOnBambooBreak,
                 buttonText: 'Set Duration',
