@@ -163,7 +163,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
         bambooBreakTimes: breakTimes,
         onTimeSelected: (selectedTime) {
           setState(() {
-            remainingTime = selectedTime * 60;
+            remainingTime = breakTimes[selectedTime] * 60;
             _animationController.duration = Duration(seconds: remainingTime);
             _animationController.reset();
           });
