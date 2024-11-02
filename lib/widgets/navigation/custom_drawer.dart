@@ -11,14 +11,9 @@ class CustomDrawer extends StatelessWidget {
       child: Drawer(
         backgroundColor: Colors.grey[900],
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.grey[850],
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(20)),
-              ),
               child: Column(
                 children: [
                   const CircleAvatar(
@@ -40,8 +35,9 @@ class CustomDrawer extends StatelessWidget {
                 child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: const [
-                DrawerMenuItem(icon: Icons.home, label: 'Home'),
-                DrawerMenuItem(icon: Icons.show_chart, label: 'Progress'),
+                DrawerMenuItem(icon: Icons.home, label: 'Panda Den'),
+                DrawerMenuItem(icon: Icons.show_chart, label: 'Growth Stats'),
+                DrawerMenuItem(icon: Icons.show_chart, label: 'Bamboo Bazaar'),
                 DrawerMenuItem(icon: Icons.settings, label: 'Settings'),
                 DrawerMenuItem(icon: Icons.logout, label: 'Logout'),
               ],
