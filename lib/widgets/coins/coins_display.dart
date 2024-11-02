@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pandatime/utils/localStorage/coins_storage.dart';
+import 'package:pandatime/utils/storage/coins_storage.dart';
 
 class CoinsDisplay extends StatefulWidget {
   const CoinsDisplay({super.key});

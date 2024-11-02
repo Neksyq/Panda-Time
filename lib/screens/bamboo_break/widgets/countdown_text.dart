@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pandatime/utils/time_formatter.dart';
+import 'package:pandatime/utils/formatters/time_formatter.dart';
 
 /// Builds the formatted countdown text
 class CountdownText extends StatelessWidget {

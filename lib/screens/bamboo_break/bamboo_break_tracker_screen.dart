@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pandatime/widgets/bambooBreak/control_button.dart';
-import 'package:pandatime/widgets/bambooBreak/progress_indicator.dart';
-import 'package:pandatime/widgets/bambooBreak/set_time_button.dart';
-import 'package:pandatime/widgets/bambooBreak/status.dart';
+import 'package:pandatime/components/control_button.dart';
+import 'package:pandatime/screens/bamboo_break/widgets/progress_indicator.dart';
+import 'package:pandatime/screens/bamboo_break/widgets/open_time_picker_button.dart';
+import 'package:pandatime/components/status.dart';
 import 'package:pandatime/widgets/coins/coins_display.dart';
-import 'package:pandatime/widgets/countdown_text.dart';
+import 'package:pandatime/screens/bamboo_break/widgets/countdown_text.dart';
 import 'package:pandatime/widgets/xpBar/xp_bar.dart';
 import 'package:pandatime/widgets/timePicker/cupertino_panda_time_picker.dart';
 import 'package:pandatime/widgets/timePicker/time_picker_header.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:pandatime/widgets/messages/flash_message_screen.dart';
+import 'package:pandatime/screens/bamboo_break/flash_message_screen.dart';
 
 class BambooBreakTrackerScreen extends StatefulWidget {
   const BambooBreakTrackerScreen({super.key});
@@ -195,11 +195,107 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     );
   }
 
+  int selectedIndex = 0;
+
+  void onItemTap(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    Navigator.pop(context); // Close drawer on item tap
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
         actions: [CoinsDisplay(key: _coinsDisplayKey)],
+      ),
+      drawer: Container(
+        width: MediaQuery.of(context).size.width * 0.6,
+        child: Drawer(
+          backgroundColor: Colors.grey[900],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(20)),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: AssetImage('assets/profile_pic.png'),
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Panda User',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Level 10 • 5000 XP',
+                          style:
+                              TextStyle(color: Colors.grey[400], fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Menu Items
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  children: [
+                    DrawerMenuItem(
+                      icon: Icons.home,
+                      label: 'Home',
+                      isSelected: selectedIndex == 0,
+                      onTap: () => onItemTap(0),
+                    ),
+                    DrawerMenuItem(
+                      icon: Icons.show_chart,
+                      label: 'Progress',
+                      isSelected: selectedIndex == 1,
+                      onTap: () => onItemTap(1),
+                    ),
+                    DrawerMenuItem(
+                      icon: Icons.settings,
+                      label: 'Settings',
+                      isSelected: selectedIndex == 2,
+                      onTap: () => onItemTap(2),
+                    ),
+                    DrawerMenuItem(
+                      icon: Icons.logout,
+                      label: 'Logout',
+                      isSelected: selectedIndex == 3,
+                      onTap: () => onItemTap(3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.only(top: 0.0), // Adjust the top padding here
@@ -231,6 +327,47 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
                 executeOnActive: () => {_stopBambooBreak()},
                 executeOnNonActive: () => {_startBambooBreak()}),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class DrawerMenuItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const DrawerMenuItem({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      child: Material(
+        color: isSelected ? Colors.blueAccent : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
+          leading:
+              Icon(icon, color: isSelected ? Colors.white : Colors.grey[400]),
+          title: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey[400],
+              fontSize: 16,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          onTap: onTap,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

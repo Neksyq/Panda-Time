@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pandatime/utils/localStorage/xp_storage.dart';
+import 'package:pandatime/utils/storage/xp_storage.dart';
 
 class XPBar extends StatefulWidget {
   const XPBar({super.key});

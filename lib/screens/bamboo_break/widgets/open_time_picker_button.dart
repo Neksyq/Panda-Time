@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 /// Builds the button to set BambooBreak duration
-
 class OpenTimePickerButton extends StatelessWidget {
   final bool isEnabled;
   final VoidCallback onButtonPressed;
