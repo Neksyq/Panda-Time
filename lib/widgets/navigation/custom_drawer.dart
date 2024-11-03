@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pandatime/screens/statistics/statistics_screen.dart';
 import 'package:pandatime/widgets/navigation/drawer_menu_item.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -34,12 +35,34 @@ class CustomDrawer extends StatelessWidget {
             Expanded(
                 child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              children: const [
-                DrawerMenuItem(icon: Icons.home, label: 'Panda Den'),
-                DrawerMenuItem(icon: Icons.show_chart, label: 'Growth Stats'),
-                DrawerMenuItem(icon: Icons.show_chart, label: 'Bamboo Bazaar'),
-                DrawerMenuItem(icon: Icons.settings, label: 'Settings'),
-                DrawerMenuItem(icon: Icons.logout, label: 'Logout'),
+              children: [
+                DrawerMenuItem(
+                  icon: Icons.home,
+                  label: 'Panda Den',
+                  onTap: () {},
+                ),
+                DrawerMenuItem(
+                    icon: Icons.show_chart,
+                    label: 'Growth Stats',
+                    onTap: () {
+                      Navigator.pop(context); // Close the drawer
+                      Navigator.pushReplacementNamed(context, '/growth_stats');
+                    }),
+                DrawerMenuItem(
+                  icon: Icons.show_chart,
+                  label: 'Bamboo Bazaar',
+                  onTap: () {},
+                ),
+                DrawerMenuItem(
+                  icon: Icons.settings,
+                  label: 'Settings',
+                  onTap: () {},
+                ),
+                DrawerMenuItem(
+                  icon: Icons.logout,
+                  label: 'Logout',
+                  onTap: () {},
+                ),
               ],
             ))
           ],
