@@ -6,12 +6,14 @@ class TimePicker extends StatelessWidget {
   final int initialTime;
   final List<int> bambooBreakTimes;
   final ValueChanged<int> onTimeSelected;
+  final VoidCallback onDonePressed;
 
   const TimePicker({
     super.key,
     required this.initialTime,
     required this.bambooBreakTimes,
     required this.onTimeSelected,
+    required this.onDonePressed,
   });
 
   @override
@@ -23,7 +25,7 @@ class TimePicker extends StatelessWidget {
           PickerHeader(
             leftTopText: 'Select Bamboo Break Duration',
             rightTopText: 'Done',
-            onDonePressed: () => Navigator.of(context).pop(),
+            onDonePressed: onDonePressed,
           ),
           CupertinoPandaTimePicker(
             selectedIndex: initialTime,

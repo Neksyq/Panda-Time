@@ -135,6 +135,8 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
         _stopBreak();
         _showCompletionMessage();
         remainingTime = lastSelectedTime;
+        _animationController.duration = Duration(seconds: remainingTime);
+        _animationController.reset();
       }
     });
   }
@@ -156,17 +158,24 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
 
   /// Opens the time picker to select break duration
   void _showTimePicker(BuildContext context) {
+    var currentSelectedTime = defaultBreakTime;
     showModalBottomSheet(
       context: context,
       builder: (_) => TimePicker(
-        initialTime: remainingTime ~/ 60,
+        initialTime: breakTimes.indexOf(remainingTime ~/ 60),
         bambooBreakTimes: breakTimes,
         onTimeSelected: (selectedTime) {
+          currentSelectedTime = breakTimes[selectedTime] * 60;
+        },
+        onDonePressed: () {
+          // Set remaining time and close the picker
           setState(() {
-            remainingTime = breakTimes[selectedTime] * 60;
+            remainingTime =
+                currentSelectedTime; // Apply the selected time in seconds
             _animationController.duration = Duration(seconds: remainingTime);
             _animationController.reset();
           });
+          Navigator.of(context).pop(); // Close the modal
         },
       ),
     );
@@ -178,7 +187,9 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
+            padding: const EdgeInsets.only(left: 16.0, top: 12.0),
             icon: const Icon(Icons.menu),
+            iconSize: 36.0,
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
@@ -190,6 +201,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
+          const SizedBox(height: 20),
           XPBar(key: _xpBarKey),
           const SizedBox(height: 20),
           CurrentStatusText(
