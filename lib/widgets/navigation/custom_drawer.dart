@@ -39,7 +39,10 @@ class CustomDrawer extends StatelessWidget {
                 DrawerMenuItem(
                   icon: Icons.home,
                   label: 'Panda Den',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, '/panda_home');
+                  },
                 ),
                 DrawerMenuItem(
                     icon: Icons.show_chart,

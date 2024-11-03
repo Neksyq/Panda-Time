@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           '/growth_stats': (context) => const GrowStats(),
+          '/panda_home': (context) => const BambooBreakTrackerScreen()
         },
         debugShowCheckedModeBanner: false,
         home: const Scaffold(
