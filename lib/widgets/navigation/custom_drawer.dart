@@ -10,7 +10,7 @@ class CustomDrawer extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.6,
       child: Drawer(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -21,14 +21,14 @@ class CustomDrawer extends StatelessWidget {
                       radius: 30,
                       backgroundImage: AssetImage('assets/profile_pic.png')),
                   const SizedBox(height: 16),
-                  const Text('Panda User',
+                  Text('Panda User',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.grey[800],
                           fontSize: 18,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text('Level 10 • 5000 XP',
-                      style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+                      style: TextStyle(color: Colors.grey[800], fontSize: 14)),
                 ],
               ),
             ),
@@ -38,7 +38,7 @@ class CustomDrawer extends StatelessWidget {
               children: [
                 DrawerMenuItem(
                   icon: Icons.home,
-                  label: 'Panda Den',
+                  label: 'Panda Home',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, '/panda_home');
@@ -46,14 +46,19 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 DrawerMenuItem(
                     icon: Icons.show_chart,
-                    label: 'Growth Stats',
+                    label: 'Statistics',
                     onTap: () {
                       Navigator.pop(context); // Close the drawer
                       Navigator.pushReplacementNamed(context, '/growth_stats');
                     }),
                 DrawerMenuItem(
                   icon: Icons.show_chart,
-                  label: 'Bamboo Bazaar',
+                  label: 'Achievements & Challenges',
+                  onTap: () {},
+                ),
+                DrawerMenuItem(
+                  icon: Icons.show_chart,
+                  label: 'Bamboo shop',
                   onTap: () {},
                 ),
                 DrawerMenuItem(

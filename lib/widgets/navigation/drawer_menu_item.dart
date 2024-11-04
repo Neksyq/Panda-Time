@@ -24,12 +24,12 @@ class DrawerMenuItem extends StatelessWidget {
           child: ListTile(
             leading: Icon(
               icon,
-              color: isSelected ? Colors.white : Colors.grey[400],
+              color: isSelected ? Colors.white : Colors.grey[800],
             ),
             title: Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[400],
+                color: isSelected ? Colors.white : Colors.grey[800],
                 fontSize: 16,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
