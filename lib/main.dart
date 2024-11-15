@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pandatime/screens/authentication/authentication_screen.dart';
 import 'package:pandatime/screens/statistics/statistics_screen.dart';
 import 'screens/bamboo_break/bamboo_break_tracker_screen.dart';
 import 'package:firebase_core/firebase_core.dart';

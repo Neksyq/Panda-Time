@@ -185,16 +185,19 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            padding: const EdgeInsets.only(left: 16.0, top: 12.0),
-            icon: const Icon(Icons.menu),
-            iconSize: 36.0,
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
+        backgroundColor: Colors.white,
+        leading: isOnBreak
+            ? Container()
+            : Builder(
+                builder: (context) => IconButton(
+                  padding: const EdgeInsets.only(left: 16.0, top: 12.0),
+                  icon: const Icon(Icons.menu),
+                  iconSize: 36.0,
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              ),
         actions: [CoinsDisplay(key: _coinsDisplayKey)],
       ),
       drawer: const CustomDrawer(),
@@ -238,12 +241,12 @@ class DrawerMenuItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const DrawerMenuItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
