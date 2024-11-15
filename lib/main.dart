@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pandatime/screens/authentication/authentication_screen.dart';
 import 'package:pandatime/screens/statistics/statistics_screen.dart';
 import 'screens/bamboo_break/bamboo_break_tracker_screen.dart';
@@ -7,6 +8,8 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -28,6 +31,6 @@ class MyApp extends StatelessWidget {
           '/panda_home': (context) => const BambooBreakTrackerScreen()
         },
         debugShowCheckedModeBanner: false,
-        home: const AuthScreen());
+        home: const BambooBreakTrackerScreen());
   }
 }
