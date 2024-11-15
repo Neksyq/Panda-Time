@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pandatime/screens/statistics/statistics_screen.dart';
 import 'package:pandatime/widgets/navigation/drawer_menu_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -69,7 +69,9 @@ class CustomDrawer extends StatelessWidget {
                 DrawerMenuItem(
                   icon: Icons.logout,
                   label: 'Logout',
-                  onTap: () {},
+                  onTap: () async {
+                    await _signOutFromGoogle();
+                  },
                 ),
               ],
             ))
@@ -77,5 +79,14 @@ class CustomDrawer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> _signOutFromGoogle() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
   }
 }

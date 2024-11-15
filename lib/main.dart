@@ -28,6 +28,6 @@ class MyApp extends StatelessWidget {
           '/panda_home': (context) => const BambooBreakTrackerScreen()
         },
         debugShowCheckedModeBanner: false,
-        home: AuthScreen());
+        home: const AuthScreen());
   }
 }
