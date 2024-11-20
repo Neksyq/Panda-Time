@@ -36,8 +36,10 @@ class _GrowStatsState extends State<GrowStats> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: Builder(
           builder: (context) => IconButton(
+            color: Colors.green,
             padding: const EdgeInsets.only(left: 16.0, top: 12.0),
             icon: const Icon(Icons.menu),
             iconSize: 36.0,
