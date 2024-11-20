@@ -14,6 +14,28 @@ import 'package:pandatime/screens/bamboo_break/flash_message_screen.dart';
 
 import 'widgets/time_picker/time_picker_modal.dart';
 
+class BambooBreakTimer {
+  static final BambooBreakTimer _instance = BambooBreakTimer._internal();
+
+  factory BambooBreakTimer() {
+    return _instance;
+  }
+
+  BambooBreakTimer._internal();
+
+  static const int defaultBreakTime = 300;
+  int remainingTime = defaultBreakTime;
+  bool isOnBreak = false;
+  double earnedPointsPerSession = 0;
+  Timer? countdownTimer;
+
+  void reset() {
+    remainingTime = defaultBreakTime;
+    isOnBreak = false;
+    countdownTimer?.cancel();
+  }
+}
+
 class BambooBreakTrackerScreen extends StatefulWidget {
   const BambooBreakTrackerScreen({super.key});
 
@@ -25,16 +47,10 @@ class BambooBreakTrackerScreen extends StatefulWidget {
 
 class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
-  static const int defaultBreakTime = 300;
   static const platform = MethodChannel('com.example.pandatime/screen');
 
   late AnimationController _animationController;
-  Timer? _countdownTimer;
-  bool isOnBreak = false;
-  int remainingTime = defaultBreakTime;
-  int lastSelectedTime = defaultBreakTime;
-  double earnedPointsPerSession = 0;
-
+  final timer = BambooBreakTimer();
   final GlobalKey<CoinsDisplayState> _coinsDisplayKey = GlobalKey();
   final GlobalKey<XPBarState> _xpBarKey = GlobalKey();
   final List<int> breakTimes =
@@ -43,18 +59,19 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addObserver(this); // To observe lifecycle events of the app
+    WidgetsBinding.instance.addObserver(this);
     _initializeAnimationController();
     _initializePlatformChannel();
-    WakelockPlus.enable();
+    if (timer.isOnBreak) {
+      _startBreak(resuming: true);
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
-    _countdownTimer?.cancel();
+    timer.countdownTimer?.cancel();
     WakelockPlus.disable();
     super.dispose();
   }
@@ -70,7 +87,7 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
           break;
         case 'onAppPaused':
           print('App is switched, stopping detox');
-          if (isOnBreak) {
+          if (timer.isOnBreak) {
             _stopBreak();
           }
           break;
@@ -84,85 +101,82 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     });
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      platform.invokeMethod('onAppPaused');
-    } else if (state == AppLifecycleState.resumed) {
-      platform.invokeMethod('onAppResumed');
-    }
-  }
-
   void _initializeAnimationController() {
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: remainingTime),
+      duration: Duration(seconds: timer.remainingTime),
     )..addListener(() {
         setState(() {});
       });
   }
 
-  /// Starts or resumes the break session
-  void _startBreak() {
+  void _startBreak({bool resuming = false}) {
     setState(() {
-      isOnBreak = true;
+      timer.isOnBreak = true;
       WakelockPlus.enable();
-      _animationController.duration = Duration(seconds: remainingTime);
-      _animationController.forward();
+      _animationController.duration = Duration(seconds: timer.remainingTime);
+      if (!resuming) {
+        _animationController.forward();
+      }
     });
 
     _startCountdown();
   }
 
-  /// Stops (pauses) the break session
   void _stopBreak() {
     setState(() {
-      isOnBreak = false;
+      timer.isOnBreak = false;
       WakelockPlus.disable();
       _animationController.stop();
-      _countdownTimer?.cancel();
+      timer.countdownTimer?.cancel();
     });
   }
 
-  /// Starts or continues the countdown timer
   void _startCountdown() {
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (remainingTime > 0) {
-        setState(() => remainingTime--);
+    timer.countdownTimer =
+        Timer.periodic(const Duration(seconds: 1), (timerInstance) {
+      if (timer.remainingTime > 0) {
+        setState(() {
+          timer.remainingTime--;
+        });
       } else {
-        earnedPointsPerSession = 10;
-        _updateCoins();
-        _stopBreak();
-        _showCompletionMessage();
-        remainingTime = lastSelectedTime;
-        _animationController.duration = Duration(seconds: remainingTime);
-        _animationController.reset();
+        _completeBreak();
       }
+    });
+  }
+
+  void _completeBreak() {
+    timer.earnedPointsPerSession = 10;
+    _updateCoins();
+    _stopBreak();
+    _showCompletionMessage();
+    _animationController.reset();
+    setState(() {
+      timer.remainingTime = BambooBreakTimer.defaultBreakTime;
     });
   }
 
   void _updateCoins() {
     final currentCoins = _coinsDisplayKey.currentState?.coins ?? 0;
     _coinsDisplayKey.currentState
-        ?.updateCoins(currentCoins + earnedPointsPerSession);
+        ?.updateCoins(currentCoins + timer.earnedPointsPerSession);
   }
 
   void _showCompletionMessage() {
     showFlashMessage(
       context,
       "Panda-tastic!",
-      "You've earned $earnedPointsPerSession bamboo coins!",
+      "You've earned ${timer.earnedPointsPerSession} bamboo coins!",
       backgroundColor: Colors.green,
     );
   }
 
-  /// Opens the time picker to select break duration
   void _showTimePicker(BuildContext context) {
-    var currentSelectedTime = defaultBreakTime;
+    var currentSelectedTime = BambooBreakTimer.defaultBreakTime;
     showModalBottomSheet(
       context: context,
       builder: (_) => TimePicker(
-        initialTime: breakTimes.indexOf(remainingTime ~/ 60),
+        initialTime: breakTimes.indexOf(timer.remainingTime ~/ 60),
         bambooBreakTimes: breakTimes,
         onTimeSelected: (selectedTime) {
           currentSelectedTime = breakTimes[selectedTime] * 60;
@@ -170,12 +184,12 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
         onDonePressed: () {
           // Set remaining time and close the picker
           setState(() {
-            remainingTime =
-                currentSelectedTime; // Apply the selected time in seconds
-            _animationController.duration = Duration(seconds: remainingTime);
+            timer.remainingTime = currentSelectedTime;
+            _animationController.duration =
+                Duration(seconds: timer.remainingTime);
             _animationController.reset();
           });
-          Navigator.of(context).pop(); // Close the modal
+          Navigator.of(context).pop();
         },
       ),
     );
@@ -186,10 +200,11 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: isOnBreak
+        leading: timer.isOnBreak
             ? Container()
             : Builder(
                 builder: (context) => IconButton(
+                  color: Colors.green,
                   padding: const EdgeInsets.only(left: 16.0, top: 12.0),
                   icon: const Icon(Icons.menu),
                   iconSize: 36.0,
@@ -208,68 +223,32 @@ class _BambooBreakTrackerScreenState extends State<BambooBreakTrackerScreen>
           XPBar(key: _xpBarKey),
           const SizedBox(height: 20),
           CurrentStatusText(
-              text1: 'Bamboo Bliss Mode...',
-              text2: 'Out of the Bamboo Forest',
-              isActive: isOnBreak),
+            text1: 'Bamboo Bliss Mode...',
+            text2: 'Out of the Bamboo Forest',
+            isActive: timer.isOnBreak,
+          ),
           const SizedBox(height: 30),
           BambooBreakProcessIndicator(
-              animationController: _animationController, isActive: isOnBreak),
+            animationController: _animationController,
+            isActive: timer.isOnBreak,
+          ),
           const SizedBox(height: 20),
-          CountdownText(time: remainingTime),
+          CountdownText(time: timer.remainingTime),
           const SizedBox(height: 20),
           OpenTimePickerButton(
-              isEnabled: isOnBreak,
-              buttonText: 'Set Duration',
-              onButtonPressed: () => {_showTimePicker(context)}),
+            isEnabled: !timer.isOnBreak,
+            buttonText: 'Set Duration',
+            onButtonPressed: () => _showTimePicker(context),
+          ),
           const SizedBox(height: 20),
           ControlButton(
-              isActive: isOnBreak,
-              textOnActive: 'Stop Bamboo Break',
-              textOnNonActive: 'Start Bamboo Break',
-              executeOnActive: () => {_stopBreak()},
-              executeOnNonActive: () => {_startBreak()}),
-        ],
-      ),
-    );
-  }
-}
-
-class DrawerMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const DrawerMenuItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-      child: Material(
-        color: isSelected ? Colors.blueAccent : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: ListTile(
-          leading:
-              Icon(icon, color: isSelected ? Colors.white : Colors.grey[400]),
-          title: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey[400],
-              fontSize: 16,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+            isActive: timer.isOnBreak,
+            textOnActive: 'Cancel Bamboo Break',
+            textOnNonActive: 'Start Bamboo Break',
+            executeOnActive: _stopBreak,
+            executeOnNonActive: _startBreak,
           ),
-          onTap: onTap,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+        ],
       ),
     );
   }
