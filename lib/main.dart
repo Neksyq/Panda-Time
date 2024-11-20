@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pandatime/screens/achievements_screen.dart';
 import 'package:pandatime/screens/statistics/statistics_screen.dart';
 import 'screens/bamboo_break/bamboo_break_tracker_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           '/growth_stats': (context) => const GrowStats(),
-          '/panda_home': (context) => const BambooBreakTrackerScreen()
+          '/panda_home': (context) => const BambooBreakTrackerScreen(),
+          '/achievements': (context) => const AchievementsScreen()
         },
         debugShowCheckedModeBanner: false,
         home: const BambooBreakTrackerScreen());

@@ -54,7 +54,10 @@ class CustomDrawer extends StatelessWidget {
                 DrawerMenuItem(
                   icon: Icons.show_chart,
                   label: 'Achievements & Challenges',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, '/achievements');
+                  },
                 ),
                 DrawerMenuItem(
                   icon: Icons.show_chart,
